@@ -80,6 +80,7 @@ void rulesTest() {
       Rules r = (isMathOperator | isNum | isDigit);
       expect(r.name, "Or");
       expect(r.check(s).match, true);
+      expect(r.check("968+7").match, true);
       print(r.check(s));
       var a = r.consume(s);
       print(a);

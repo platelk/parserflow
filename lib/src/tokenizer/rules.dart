@@ -108,7 +108,10 @@ class Rules implements Clonable<Rules> {
   }
 
   ///
-  MatchInfo check(List data, {bool checkChild: true}) {
+  MatchInfo check(var data, {bool checkChild: true}) {
+    if (data is String) {
+      data = data.split('');
+    }
     MatchInfo counter = new MatchInfo();
     MatchInfo tmp;
 
