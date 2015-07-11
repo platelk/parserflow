@@ -37,13 +37,20 @@ void rulesTest() {
 
       Rules r = (isMathOperator | isNum);
       expect(r.name, "Or");
+      print("==>>" + r.check(s).toString());
       expect(r.check(s).match, true);
-      r >> s;
+      var a = r.consume(s);
+      print(a);
       expect(s[0], "+");
+      a = r.consume(s);
+      print(a);
+      a = r.consume(s);
+      print(a);
       s = new List.from(base);
 
-      (isNum & isMathOperator) << s;
+      a = (isNum & isMathOperator).consume(s);
       expect(s[0], "7");
+      print(a);
     });
   });
 }

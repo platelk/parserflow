@@ -6,15 +6,18 @@ class Or extends Rules {
   }
 
   MatchInfo _checkChild(List data) {
-    MatchInfo counter = new MatchInfo(counter: MatchInfo.MATCH_FAILED);
+    MatchInfo counter = new MatchInfo()..matchRule = this;
     MatchInfo tmp;
 
     for (Rules r in _child) {
       tmp = r.check(data);
-      print("=> tmp: ${tmp.counter}");
-      if (tmp.match == true)
-        return tmp;
+      counter.child.add(tmp);
+      if (tmp.match == true) {
+        counter << tmp;
+        return counter;
+      }
     }
+    counter.counter = MatchInfo.MATCH_FAILED;
     return counter;
   }
 }

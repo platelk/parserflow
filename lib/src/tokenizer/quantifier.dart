@@ -47,15 +47,16 @@ MatchInfo matchQuantifyRules(List data, RulesMatcher r, Quantifier quantifier) {
   MatchInfo match = new MatchInfo();
 
   do {
-
     tmp = r(data.sublist(count));
     if (tmp != MatchInfo.MATCH_FAILED) nbMatch++;
-    count += tmp == MatchInfo.MATCH_FAILED ? 0 : tmp;
+    count += (tmp == MatchInfo.MATCH_FAILED ? 0 : tmp);
   } while(count < data.length && tmp != MatchInfo.MATCH_FAILED && _continueCheck(nbMatch, quantifier));
   if (_matchQuantifier(nbMatch, quantifier)) {
     match << count;
+    match.matchData = data.sublist(match.start, match.start+match.counter);
     return match;
   } else {
+    match.matchData = data.sublist(match.start, match.start+match.counter);
     match.counter = MatchInfo.MATCH_FAILED;
     return match;
   }
