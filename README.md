@@ -10,17 +10,17 @@ The main objective of parserflow is to provide enough abstraction and functional
 ## Features
 
 Parserflow allow you to :
-- [DONE] Create your grammar by code like : 
+- **[DONE]** Create your grammar by code like : 
 ```dart
 var myRule = (isDigit | isMathOperator) & isNum;
 ```
-- [DONE] Use a comprehensive syntax to define quantity like
+- **[DONE]** Use a comprehensive syntax to define quantity like
 ```dart
 var myRule = (isDigit["*"] | isMathOperator["*"]) & isDigit[3]
 ```
-- [IN PROGRESS] Simply define hook
-- [TO DO] Use directly some parser implementation like LL(k) or LR(k)
-- [TO DO] Directly parse from a BNF
+- **[IN PROGRESS]** Simply define hook
+- **[TO DO]** Use directly some parser implementation like LL(k) or LR(k)
+- **[TO DO]** Directly parse from a BNF
    
 ## Example
 
