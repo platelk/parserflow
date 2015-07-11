@@ -2,7 +2,7 @@ part of parserflow;
 
 typedef int RulesMatcher(List data);
 
-class Rules {
+class Rules implements Clonable<Rules> {
   static final log = new Logger("Rules");
   String name;
   List<Rules> _child = [];
@@ -21,11 +21,21 @@ class Rules {
   }
 
   Rules operator&(Rules r) {
-    return new And([this, r]);
+    if (r is And) {
+      r._child.add(this);
+      return r;
+    } else {
+      return new And([this, r]);
+    }
   }
 
   Rules operator|(Rules r) {
-    return new Or([this, r]);
+    if (r is Or) {
+      r._child.add(this);
+      return r;
+    } else {
+      return new Or([this, r]);
+    }
   }
 
   operator<<(var r) {
@@ -38,25 +48,26 @@ class Rules {
   }
 
   Rules operator[](var quantifior) {
-    if (quantifior is Quantifier) this.quantifier = quantifior;
+    var tmp = this.clone();
+    if (quantifior is Quantifier) tmp.quantifier = quantifior;
     else if (quantifior is String) {
       switch (quantifior) {
         case "*":
-          this.quantifier = Quantifier.ZeroOrMore;
+          tmp.quantifier = Quantifier.ZeroOrMore;
           break;
         case "+":
-          this.quantifier = Quantifier.OneOrMore;
+          tmp.quantifier = Quantifier.OneOrMore;
           break;
         case "?":
-          this.quantifier = Quantifier.OneOrNot;
+          tmp.quantifier = Quantifier.OneOrNot;
           break;
       }
     } else if (quantifior is int) {
-      this.quantifier = Quantifier.NTimes;
-      this.quantity = quantifior;
+      tmp.quantifier = Quantifier.NTimes;
+      tmp.quantity = quantifior;
     }
 
-    return this;
+    return tmp;
   }
 
   // TODO : adding exception throw
@@ -128,5 +139,26 @@ class Rules {
     var ret = data.sublist(0, counter.counter);
     data.removeRange(0, counter.counter);
     return ret;
+  }
+
+  String toString() {
+    var s = "[Rules (${this.name})] quantifior: ${this.quantifier}, quantity: ${this.quantity}, nbChild: ${this._child.length}\n";
+    for (var r in this._child) {
+      s += " - " + r.toString();
+    }
+    return s;
+  }
+
+  Rules _clone() {
+    return new Rules(this.name);
+  }
+
+  clone() {
+    var t = _clone();
+    t.name = this.name;
+    t.quantifier = this.quantifier;
+    t._matcher = this._matcher;
+    t._child = this._child;
+    return t;
   }
 }

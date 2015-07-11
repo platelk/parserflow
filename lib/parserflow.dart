@@ -10,6 +10,8 @@ import "dart:collection";
 import "dart:async";
 import "package:logging/logging.dart";
 
+import "src/tools/tools.dart";
+
 // TODO: Export any libraries intended for clients of this package.
 
 part "src/scanner/parse_unit.dart";

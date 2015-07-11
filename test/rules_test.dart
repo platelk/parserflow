@@ -72,6 +72,29 @@ void rulesTest() {
       a = (isNum[2] & isMathOperator["?"]).consume(s);
       expect(s[0], "8");
     });
+
+    test("Rules multiple combinations", () {
+      List base = ["9", "6", "8", "+", "7"];
+      List s = new List.from(base);
+
+      Rules r = (isMathOperator | isNum | isDigit);
+      expect(r.name, "Or");
+      expect(r.check(s).match, true);
+      print(r.check(s));
+      var a = r.consume(s);
+      print(a);
+      expect(s[0], "+");
+      a = r.consume(s);
+      a = r.consume(s);
+      expect(s.length, 0);
+      expect(a, ["7"]);
+      s = new List.from(base);
+
+      r = (isNum & isMathOperator & isDigit);
+      a = r.consume(s);
+      expect(s.length, 0);
+      print(a);
+    });
   });
 }
 
