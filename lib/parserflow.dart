@@ -23,3 +23,4 @@ part "src/tokenizer/matcher.dart";
 part "src/tokenizer/base_rules/and_or_rules.dart";
 part "src/tokenizer/base_rules/is_num_rules.dart";
 part "src/tokenizer/base_rules/is_operator.dart";
+part "src/tokenizer/base_rules/is_string_rules.dart";

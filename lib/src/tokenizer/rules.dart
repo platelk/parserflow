@@ -8,8 +8,9 @@ class Rules {
   List<Rules> _child = [];
   RulesMatcher _matcher;
   Quantifier quantifier;
+  int quantity;
 
-  Rules(this.name, {RulesMatcher matcher, this.quantifier}) : _matcher = matcher {
+  Rules(this.name, {RulesMatcher matcher, this.quantifier, this.quantity: 1}) : _matcher = matcher {
     if (quantifier == null)
       quantifier = Quantifier.One;
   }
@@ -34,6 +35,28 @@ class Rules {
       consume(r);
       return r;
     }
+  }
+
+  Rules operator[](var quantifior) {
+    if (quantifior is Quantifier) this.quantifier = quantifior;
+    else if (quantifior is String) {
+      switch (quantifior) {
+        case "*":
+          this.quantifier = Quantifier.ZeroOrMore;
+          break;
+        case "+":
+          this.quantifier = Quantifier.OneOrMore;
+          break;
+        case "?":
+          this.quantifier = Quantifier.OneOrNot;
+          break;
+      }
+    } else if (quantifior is int) {
+      this.quantifier = Quantifier.NTimes;
+      this.quantity = quantifior;
+    }
+
+    return this;
   }
 
   // TODO : adding exception throw
@@ -69,7 +92,7 @@ class Rules {
 ///   Return a MatchInfo object
   MatchInfo _check(List data) {
     log.finest("${name}: check on ${data}");
-    return matchQuantifyRules(data, _matcher, quantifier)
+    return matchQuantifyRules(data, _matcher, quantifier, quantity: this.quantity)
             ..matchRule = this;
   }
 

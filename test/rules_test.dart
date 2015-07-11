@@ -37,7 +37,6 @@ void rulesTest() {
 
       Rules r = (isMathOperator | isNum);
       expect(r.name, "Or");
-      print("==>>" + r.check(s).toString());
       expect(r.check(s).match, true);
       var a = r.consume(s);
       print(a);
@@ -51,6 +50,27 @@ void rulesTest() {
       a = (isNum & isMathOperator).consume(s);
       expect(s[0], "7");
       print(a);
+    });
+
+    test("Rules combinations with Ntimes quantifier", () {
+      List base = ["9", "6", "8", "+", "7"];
+      List s = new List.from(base);
+
+      Rules r = (isMathOperator | isDigit[3]);
+      expect(r.name, "Or");
+      expect(r.check(s).match, true);
+      var a = r.consume(s);
+      print(a);
+      expect(s[0], "+");
+      a = r.consume(s);
+      a = r.consume(s);
+      print(a);
+      expect(s[0], "7");
+      expect(a, null);
+      s = new List.from(base);
+
+      a = (isNum[2] & isMathOperator["?"]).consume(s);
+      expect(s[0], "8");
     });
   });
 }

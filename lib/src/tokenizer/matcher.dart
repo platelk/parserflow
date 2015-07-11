@@ -45,7 +45,7 @@ class MatchInfo {
   String toString() {
     var s =  "[MatchInfo] count: ${counter}, start: ${start}, rules: ${matchRule}, nbChild: ${child.length}\n";
     for (var m in child) {
-      s += "  - " + m.toString() + "\n";
+      s += "  - " + m.toString();
     }
     return s;
   }
