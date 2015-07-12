@@ -22,12 +22,23 @@ class Scanner<T> {
         onCancel: _onCancel);
   }
 
+  Scanner.fromString(String input, {this.conf}) {
+    var s = new Stream.fromIterable(input.split(''));
+    var source = s.asBroadcastStream();
+    if (this.conf == null) conf = new ScannerConf();
+    this.source = source.asBroadcastStream();
+    _controller = new StreamController<ParseUnit<T>>(
+        onListen: _onListen,
+        onPause: _onPause,
+        onResume: _onResume,
+        onCancel: _onCancel);
+  }
+
   Future<ParseUnit<T>> scanOne() {
     log.finest("Calling scan()");
 
     return this.source.first.then((T e) {
       _currentPos++;
-      print("${this} ${this.conf}");
       if (e == this.conf.endLine) {
         _currentLine++;
         _currentPosInline = 0;

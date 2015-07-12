@@ -1,6 +1,6 @@
 library parserflow.rulesTest;
 
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:parserflow/parserflow.dart';
 import "dart:async";
 import "dart:io";
@@ -20,7 +20,6 @@ void rulesTest() {
       List s = ["9", "6", "8", "+", "7"];
 
       List a = isNum.consume(s);
-      print(a);
       expect(s[0], "+");
 
       MatchInfo m = isMathOperator.check(s);
@@ -39,17 +38,13 @@ void rulesTest() {
       expect(r.name, "Or");
       expect(r.check(s).match, true);
       var a = r.consume(s);
-      print(a);
       expect(s[0], "+");
       a = r.consume(s);
-      print(a);
       a = r.consume(s);
-      print(a);
       s = new List.from(base);
 
       a = (isNum & isMathOperator).consume(s);
       expect(s[0], "7");
-      print(a);
     });
 
     test("Rules combinations with Ntimes quantifier", () {
@@ -60,11 +55,9 @@ void rulesTest() {
       expect(r.name, "Or");
       expect(r.check(s).match, true);
       var a = r.consume(s);
-      print(a);
       expect(s[0], "+");
       a = r.consume(s);
       a = r.consume(s);
-      print(a);
       expect(s[0], "7");
       expect(a, null);
       s = new List.from(base);
@@ -81,9 +74,7 @@ void rulesTest() {
       expect(r.name, "Or");
       expect(r.check(s).match, true);
       expect(r.check("968+7").match, true);
-      print(r.check(s));
       var a = r.consume(s);
-      print(a);
       expect(s[0], "+");
       a = r.consume(s);
       a = r.consume(s);
@@ -94,7 +85,6 @@ void rulesTest() {
       r = (isNum & isMathOperator & isDigit);
       a = r.consume(s);
       expect(s.length, 0);
-      print(a);
     });
   });
 }

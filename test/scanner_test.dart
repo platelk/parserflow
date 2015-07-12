@@ -1,6 +1,6 @@
 library parserflow.scannerTest;
 
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:parserflow/parserflow.dart';
 import "dart:async";
 import "dart:io";
@@ -15,7 +15,7 @@ void scannerTest() {
     setUp(() {
       var s = new Stream.fromIterable(["t", "e", "s", "t", "p"]);
       var b = s.asBroadcastStream();
-      scanner = new Scanner<String>(b);
+      scanner = new Scanner.fromString("test");
     });
 
     test('scanOne()', () async {
@@ -26,6 +26,7 @@ void scannerTest() {
         p = await scanner.scanOne();
         expect(p.value, "s");
     });
+
     test('scan()', () async {
       var l = ["t", "e", "s", "t"];
       var i = 0;
@@ -34,6 +35,7 @@ void scannerTest() {
         i++;
       });
     });
+
     test("scanOne() on file", () async {
 
         var s = new File("test/ressources/simple_string.txt").openRead();
