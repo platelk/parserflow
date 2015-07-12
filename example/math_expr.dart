@@ -29,17 +29,15 @@ int visitNode(MatchInfo m, buffer) {
 }
 
 main() {
-  var number = has("-")["*"] & isNum;
-  var op = hasRegExp(r'[+|-]');
+  var number = (has("-")["*"] & isNum)..name = "number";
+  var op = hasRegExp(r'[+|-]')..name = "op";
 
-  number.name = "number";
-  op.name = "op";
-
-  var expr = number & (op & number )["*"];
+  var expr = number & (op & number)["*"];
 
   var input = "968 + 2 - 20";
   var res = expr.check(input);
-  var a = expr.consume(input);
   var tree = res.matchTree();
+
+  print(tree);
   print("${input} = ${visitChild(tree, [])[0]}");
 }
