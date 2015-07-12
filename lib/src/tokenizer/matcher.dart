@@ -25,6 +25,15 @@ class MatchInfo {
     return this;
   }
 
+  MatchInfo operator[]=(var key, var value) {
+    this.data[key] = value;
+    return this;
+  }
+
+  MatchInfo operator[](var key) {
+    return this.data[key];
+  }
+
   get matchData {
     return _matchData;
   }

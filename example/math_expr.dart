@@ -30,6 +30,10 @@ int visitNode(MatchInfo m, buffer) {
 
 main() {
   var number = (has("-")["*"] & isNum)..name = "number";
+  number.onParse.listen((i) {
+    print("number: ${i.matchData}");
+    i["value"] = int.parse(i.matchData.join());
+  });
   var op = hasRegExp(r'[+|-]')..name = "op";
 
   var expr = number & (op & number)["*"];

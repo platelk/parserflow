@@ -18,7 +18,14 @@ var myRule = (isDigit | isMathOperator) & isNum;
 ```dart
 var myRule = (isDigit["*"] | isMathOperator["*"]) & isDigit[3]
 ```
-- **[IN PROGRESS]** Simply define hook
+- **[DONE]** Simply define hook
+```dart
+  var number = (has("-")["*"] & isNum)..name = "number";
+  number.onParse.listen((i) {
+    print("number: ${i.matchData}");
+    i["value"] = int.parse(i.matchData.join());
+  });
+```
 - **[TO DO]** Use directly some parser implementation like LL(k) or LR(k)
 - **[TO DO]** Directly parse from a BNF
    

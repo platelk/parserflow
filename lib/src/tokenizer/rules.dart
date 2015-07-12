@@ -74,7 +74,13 @@ class Rules implements Clonable<Rules> {
     return data;
   }
 
-  get onParse {
+  call(var func) {
+    //var tmp = this.clone();
+    this.onParse.listen(func);
+    return this;
+  }
+
+  Stream get onParse {
     return this._onParseEvent.stream;
   }
 
@@ -146,6 +152,7 @@ class Rules implements Clonable<Rules> {
       tmp.matchRule = this;
       if (tmp.match) {
         if (tmp.counter > 0) i++;
+        this._onParseEvent.add(tmp);
         counter << tmp;
         counter.matchData = (counter.matchData == null) ? tmp.matchData: counter.matchData.addAll(tmp.matchData);
         tmp.matchRule = this;
@@ -193,6 +200,7 @@ class Rules implements Clonable<Rules> {
     t.quantifier = this.quantifier;
     t._matcher = this._matcher;
     t._child = new List.from(this._child);
+    t.onParse.listen((e) => this._onParseEvent.add(e));
     return t;
   }
 }
