@@ -71,20 +71,24 @@ void rulesTest() {
       List s = new List.from(base);
 
       Rules r = (isMathOperator | isNum | isDigit);
+      var a = r.check(s);
+      print(a.matchTree());
       expect(r.name, "Or");
       expect(r.check(s).match, true);
       expect(r.check("968+7").match, true);
-      var a = r.consume(s);
+      a = r.consume(s);
       expect(s[0], "+");
       a = r.consume(s);
       a = r.consume(s);
       expect(s.length, 0);
       expect(a, ["7"]);
       s = new List.from(base);
-
       r = (isNum & isMathOperator & isDigit);
+      a = r.check(s);
+      print(a.matchTree());
       a = r.consume(s);
       expect(s.length, 0);
+
     });
   });
 }

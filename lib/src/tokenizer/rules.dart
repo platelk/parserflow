@@ -9,10 +9,12 @@ class Rules implements Clonable<Rules> {
   RulesMatcher _matcher;
   Quantifier quantifier;
   int quantity;
+  StreamController<MatchInfo> _onParseEvent;
 
   Rules(this.name, {RulesMatcher matcher, this.quantifier, this.quantity: 1}) : _matcher = matcher {
     if (quantifier == null)
       quantifier = Quantifier.One;
+    this._onParseEvent = new StreamController.broadcast();
   }
 
   Rules addChild(Rules r) {
@@ -21,18 +23,14 @@ class Rules implements Clonable<Rules> {
   }
 
   Rules operator&(Rules r) {
-    if (r is And) {
-      r._child.add(this);
-      return r;
-    } else {
       return new And([this, r]);
-    }
   }
 
   Rules operator|(Rules r) {
     if (r is Or) {
-      r._child.add(this);
-      return r;
+      var tmp = r.clone();
+      tmp._child.insert(0, this);
+      return tmp;
     } else {
       return new Or([this, r]);
     }
@@ -76,6 +74,10 @@ class Rules implements Clonable<Rules> {
     return data;
   }
 
+  get onParse {
+    return this._onParseEvent.stream;
+  }
+
   /**
    * Check if the rule have at least one child
    */
@@ -90,8 +92,10 @@ class Rules implements Clonable<Rules> {
 
     for (Rules r in _child) {
       tmp = r.check(data.sublist(counter.counter));
-      if (tmp.match == false)
-        return tmp;
+      if (tmp.match == false) {
+        counter.counter = tmp.counter;
+        return counter;
+      }
       counter << tmp;
       counter.child.add(tmp);
     }
@@ -101,30 +105,19 @@ class Rules implements Clonable<Rules> {
 
 ///   [_check] if the input data match the rule
 ///   Return a MatchInfo object
-  MatchInfo _check(List data) {
-    log.finest("${name}: check on ${data}");
-    return matchQuantifyRules(data, _matcher, quantifier, quantity: this.quantity)
-            ..matchRule = this;
-  }
-
-  ///
-  MatchInfo check(var data, {bool checkChild: true}) {
-    if (data is String) {
-      data = data.split('');
-    }
-    MatchInfo counter = new MatchInfo();
-    MatchInfo tmp;
-
-    counter.matchRule = this;
-
+  MatchInfo _check(List data, var counter, var checkChild) {
     if (_matcher != null) {
-      counter = _check(data);
-      if (counter.match == false)
+      log.finest("${name}: check on ${data}");
+      counter = matchQuantifyRules(data, _matcher, quantifier, quantity: this.quantity)
+        ..matchRule = this;
+      if (counter.match == false) {
         return counter;
+      }
+      _onParseEvent.add(counter);
     }
 
     if (checkChild) {
-      tmp = _checkChild(data.sublist(counter.counter));
+      var tmp = _checkChild(data.sublist(counter.counter));
       log.finest("Check child result ${tmp}");
       if (tmp.match == false) return tmp;
       counter.child.addAll(tmp.child);
@@ -134,8 +127,43 @@ class Rules implements Clonable<Rules> {
     return counter;
   }
 
+  ///
+  MatchInfo check(var data, {bool checkChild: true, bool ignoreSpace : true}) {
+    if (data is String) {
+      data = new List.from(data.split(''));
+    }
+    if (ignoreSpace) {
+      data.removeWhere((e) => [" ", "\t", "\n"].contains(e));
+    }
+    MatchInfo counter = new MatchInfo();
+    MatchInfo tmp;
+
+    counter.matchRule = null;
+
+    var i = 0;
+    do {
+      tmp = _check((data as List).sublist(counter.counter), new MatchInfo(), checkChild);
+      tmp.matchRule = this;
+      if (tmp.match) {
+        if (tmp.counter > 0) i++;
+        counter << tmp;
+        counter.matchData = (counter.matchData == null) ? tmp.matchData: counter.matchData.addAll(tmp.matchData);
+        tmp.matchRule = this;
+        counter.child.add(tmp);
+      } else {
+        break;
+      }
+    } while(tmp.match && tmp.counter > 0 && continueCheck(i, this.quantifier, this.quantity) && counter.counter < data.length);
+    if (!matchQuantifier(i, this.quantifier, this.quantity))
+      counter.counter = MatchInfo.MATCH_FAILED;
+    return counter;
+  }
+
   /// Consume the input data if the rules matches
-  List consume(List data, {bool checkChild: true}) {
+  List consume(var data, {bool checkChild: true}) {
+    if (data is String) {
+      data = new List.from(data.split(''));
+    }
     MatchInfo counter = check(data, checkChild: checkChild);
     if (counter.match == false)
       return null;
@@ -147,7 +175,10 @@ class Rules implements Clonable<Rules> {
   String toString() {
     var s = "[Rules (${this.name})] quantifior: ${this.quantifier}, quantity: ${this.quantity}, nbChild: ${this._child.length}\n";
     for (var r in this._child) {
-      s += " - " + r.toString();
+      if (r != this)
+        s += " - " + r.toString();
+      else
+        s += " - [Rules (${this.name})] quantifior: ${this.quantifier}, quantity: ${this.quantity}, nbChild: ${this._child.length}\n";
     }
     return s;
   }
@@ -161,7 +192,7 @@ class Rules implements Clonable<Rules> {
     t.name = this.name;
     t.quantifier = this.quantifier;
     t._matcher = this._matcher;
-    t._child = this._child;
+    t._child = new List.from(this._child);
     return t;
   }
 }

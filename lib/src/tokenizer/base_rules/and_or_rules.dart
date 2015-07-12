@@ -1,7 +1,8 @@
 part of parserflow;
 
 class Or extends Rules {
-  Or(List<Rules> r) : super("Or") {
+  Or([List<Rules> r]) : super("Or") {
+    if (r != null)
     this._child.addAll(r);
   }
 
@@ -22,12 +23,9 @@ class Or extends Rules {
   }
 
   Rules operator|(Rules r) {
-    if (r is Or) {
-      this._child.addAll(r._child);
-    } else {
-      this._child.add(r);
-    }
-    return this;
+    var tmp = this.clone();
+    tmp._child.add(r);
+    return tmp;
   }
 
   Rules _clone() {
@@ -36,18 +34,9 @@ class Or extends Rules {
 }
 
 class And extends Rules {
-  And(List<Rules> r) : super("And") {
-    this._child.addAll(r);
-  }
-
-
-  Rules operator&(Rules r) {
-    if (r is And) {
-      this._child.addAll(r._child);
-    } else {
-      this._child.add(r);
-    }
-    return this;
+  And([List<Rules> r]) : super("And") {
+    if (r != null)
+      this._child.addAll(r);
   }
 
   Rules _clone() {

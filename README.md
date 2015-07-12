@@ -38,6 +38,26 @@ void main() {
 }
 ```
 
+### Parse a simple math expression
+Here a part of the example that you can find in 'example/math_expr.dart'
+```dart
+main() {
+  var number = has("-")["*"] & isNum;
+  var op = hasRegExp(r'[+|-]');
+
+  number.name = "number";
+  op.name = "op";
+
+  var expr = number & (op & number )["*"];
+
+  var input = "968 + 2 - 20";
+  var res = expr.check(input);
+  var a = expr.consume(input);
+  var tree = res.matchTree();
+  print("${input} = ${visitChild(tree, [])[0]}");
+}
+```
+
 ## Future
 
 Actually my main focus is to make parserflow as easy as possible, but the second step will be to make it a quick as posible.

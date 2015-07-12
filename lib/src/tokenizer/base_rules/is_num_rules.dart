@@ -22,7 +22,6 @@ int isNumMatcher(var data) {
       return tmp == 0 ? MatchInfo.MATCH_FAILED : tmp;
     tmp++;
   }
-  print("IsNumMatcher : ${tmp}");
   return tmp;
 }
 

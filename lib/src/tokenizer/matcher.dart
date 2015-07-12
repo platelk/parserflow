@@ -7,6 +7,7 @@ class MatchInfo {
   var _matchData;
   Rules matchRule;
   List<MatchInfo> child;
+  Map data = {};
   MatchInfo({this.counter: 0, this.start: 0, this.matchRule, this.child}) {
     if (this.child == null) this.child = [];
   }
@@ -42,11 +43,52 @@ class MatchInfo {
 
   bool get match => counter != MATCH_FAILED;
 
+
   String toString() {
-    var s =  "[MatchInfo] count: ${counter}, start: ${start}, rules: ${matchRule}, nbChild: ${child.length}\n";
+    var s =  "(MatchInfo, ${matchRule != null ? matchRule.name: ''})";
+    return s;
+  }
+
+  String toStringFullInfo() {
+    var s =  "[MatchInfo] count: ${counter}, start: ${start}, rules: ${matchRule}, nbChild: ${child.length}, match |${this.matchData}|\n";
     for (var m in child) {
-      s += "  - " + m.toString();
+      if (m != this)
+        s += "  - " + m.toString();
     }
     return s;
+  }
+
+  List<String> matchDataTree() {
+    var l = this.matchRule is Or || this.matchRule is And || this.matchData == null || this.child.length > 0 ? [] : [this.matchData];
+    for (var m in child) {
+      if (m != this)
+        l.add(m.matchDataTree());
+    }
+    if (l.length == 1)
+      return l[0];
+    return l;
+  }
+
+
+  matchTree() {
+    if (this.child.length == 0 && this.matchRule != null)
+      return this;
+    var l = [];
+    for (var m in child) {
+      var t = m.matchTree();
+      if (t != null)
+        l.add(t);
+    }
+    if (this.matchRule == null && l.length == 0)
+      return null;
+    else if (this.matchRule == null && l.length == 1)
+      return l[0];
+    else if (this.matchRule == null && l.length > 0)
+      return l;
+    else if (l.length == 0)
+      return this;
+    else
+      return [this, l];
+    //return this.matchRule == null && l.length == 0 ? null : (l.length == 0 ? [this] : [this, l]);
   }
 }

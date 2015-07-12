@@ -27,9 +27,7 @@ hasMatcherGenerator(var s) {
       return MatchInfo.MATCH_FAILED;
     }
     else if (s is RegExp) {
-      print("Is regexp : " + s.toString());
       var m = (s as RegExp).firstMatch(tmp);
-      print(m);
       if (m != null && m.start == 0) {
         var m = (s as RegExp).firstMatch(tmp);
         return m.end - m.start;
@@ -55,3 +53,5 @@ Rules has(var s) {
 Rules hasRegExp(String s) {
   return new Has(new RegExp(s));
 }
+
+Rules isSpace = hasRegExp(r'[ |\t|\n]');

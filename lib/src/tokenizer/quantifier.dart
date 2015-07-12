@@ -8,7 +8,7 @@ enum Quantifier {
   NTimes
 }
 
-bool _continueCheck(int nbMatch, Quantifier quantifier, int quantity) {
+bool continueCheck(int nbMatch, Quantifier quantifier, int quantity) {
   switch (quantifier) {
     case Quantifier.One:
       if (nbMatch == 1) return false;
@@ -27,7 +27,7 @@ bool _continueCheck(int nbMatch, Quantifier quantifier, int quantity) {
   return true;
 }
 
-bool _matchQuantifier(int nbMatch, Quantifier quantifier, int quantity) {
+bool matchQuantifier(int nbMatch, Quantifier quantifier, int quantity) {
   switch (quantifier) {
     case Quantifier.One:
       if (nbMatch == 1) return true;
@@ -57,8 +57,8 @@ MatchInfo matchQuantifyRules(List data, RulesMatcher r, Quantifier quantifier, {
     tmp = r(data.sublist(count));
     if (tmp != MatchInfo.MATCH_FAILED) nbMatch++;
     count += (tmp == MatchInfo.MATCH_FAILED ? 0 : tmp);
-  } while(count < data.length && tmp != MatchInfo.MATCH_FAILED && _continueCheck(nbMatch, quantifier, quantity));
-  if (_matchQuantifier(nbMatch, quantifier, quantity)) {
+  } while(count < data.length && tmp != MatchInfo.MATCH_FAILED && continueCheck(nbMatch, quantifier, quantity));
+  if (matchQuantifier(nbMatch, quantifier, quantity)) {
     match << count;
     match.matchData = data.sublist(match.start, match.start+match.counter);
     return match;
