@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <title>Parserflow by platelk</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Parserflow</h1>
+        <h2>Dart parsing library</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/platelk/parserflow/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/platelk/parserflow/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/platelk/parserflow" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a id="parserflow" class="anchor" href="#parserflow" aria-hidden="true"><span class="octicon octicon-link"></span></a>Parserflow</h1>
+
+<p>Parserflow is a prototype of parser written in Dart inspire by <a href="http://pythonhosted.org/pyrser">pyrser</a> and <a href="https://github.com/petitparser/dart-petitparser">PetitParser</a>.
+This parser aims to provide a simple tool to implement different type of parser like LL(k) or LR(k), by offering simple mechanism like hook or grammar definition.</p>
+
+<h2>
+<a id="aims" class="anchor" href="#aims" aria-hidden="true"><span class="octicon octicon-link"></span></a>Aims</h2>
+
+<p>The main objective of parserflow is to provide enough abstraction and functionality to easily implement the parser do you need.</p>
+
+<h2>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<p>Parserflow allow you to :</p>
+
+<ul>
+<li>
+<strong>[DONE]</strong> Create your grammar by code like : </li>
+</ul>
+
+<div class="highlight highlight-dart"><pre><span class="pl-k">var</span> myRule <span class="pl-k">=</span> (isDigit <span class="pl-k">|</span> isMathOperator) <span class="pl-k">&amp;</span> isNum;</pre></div>
+
+<ul>
+<li>
+<strong>[DONE]</strong> Use a comprehensive syntax to define quantity like</li>
+</ul>
+
+<div class="highlight highlight-dart"><pre><span class="pl-k">var</span> myRule <span class="pl-k">=</span> (isDigit[<span class="pl-s">"*"</span>] <span class="pl-k">|</span> isMathOperator[<span class="pl-s">"*"</span>]) <span class="pl-k">&amp;</span> isDigit[<span class="pl-c1">3</span>]</pre></div>
+
+<ul>
+<li>
+<strong>[DONE]</strong> Simply define hook</li>
+</ul>
+
+<div class="highlight highlight-dart"><pre>  <span class="pl-k">var</span> number <span class="pl-k">=</span> (has(<span class="pl-s">"-"</span>)[<span class="pl-s">"*"</span>] <span class="pl-k">&amp;</span> isNum)..name <span class="pl-k">=</span> <span class="pl-s">"number"</span>;
+  number.onParse.listen((i) {
+    print(<span class="pl-s">"number: <span class="pl-k">${</span><span class="pl-s1">i.matchData</span><span class="pl-k">}</span>"</span>);
+    i[<span class="pl-s">"value"</span>] <span class="pl-k">=</span> <span class="pl-k">int</span>.parse(i.matchData.join());
+  });</pre></div>
+
+<ul>
+<li>
+<strong>[TO DO]</strong> Use directly some parser implementation like LL(k) or LR(k)</li>
+<li>
+<strong>[TO DO]</strong> Directly parse from a BNF</li>
+</ul>
+
+<h2>
+<a id="example" class="anchor" href="#example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example</h2>
+
+<h3>
+<a id="create-rules-and-parse-a-simple-string" class="anchor" href="#create-rules-and-parse-a-simple-string" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create rules and parse a simple string</h3>
+
+<p>Here a example of a simple rules creation and parse a simple string</p>
+
+<div class="highlight highlight-dart"><pre><span class="pl-k">import</span> <span class="pl-s">'package:parserflow/parserflow.dart'</span>;
+
+<span class="pl-k">void</span> main() {
+    <span class="pl-k">var</span> s <span class="pl-k">=</span> <span class="pl-s">"96-96*2"</span>;
+
+    <span class="pl-k">var</span> r <span class="pl-k">=</span> isNum[<span class="pl-s">"?"</span>] <span class="pl-k">&amp;</span> isMathOperator <span class="pl-k">&amp;</span> isNum <span class="pl-k">&amp;</span> (isMathOperator[<span class="pl-s">"?"</span>] <span class="pl-k">&amp;</span> isNum)[<span class="pl-s">"*"</span>];
+    <span class="pl-k">var</span> a <span class="pl-k">=</span> r.consume(s);
+    print(a);
+}</pre></div>
+
+<h3>
+<a id="parse-a-simple-math-expression" class="anchor" href="#parse-a-simple-math-expression" aria-hidden="true"><span class="octicon octicon-link"></span></a>Parse a simple math expression</h3>
+
+<p>Here a part of the example that you can find in 'example/math_expr.dart'</p>
+
+<div class="highlight highlight-dart"><pre>main() {
+  <span class="pl-k">var</span> number <span class="pl-k">=</span> (has(<span class="pl-s">"-"</span>)[<span class="pl-s">"*"</span>] <span class="pl-k">&amp;</span> isNum)..name <span class="pl-k">=</span> <span class="pl-s">"number"</span>;
+  <span class="pl-k">var</span> op <span class="pl-k">=</span> hasRegExp(<span class="pl-s">r'<span class="pl-c1">[+|-]</span>'</span>)..name <span class="pl-k">=</span> <span class="pl-s">"op"</span>;
+
+  <span class="pl-k">var</span> expr <span class="pl-k">=</span> number <span class="pl-k">&amp;</span> (op <span class="pl-k">&amp;</span> number)[<span class="pl-s">"*"</span>];
+
+  <span class="pl-k">var</span> input <span class="pl-k">=</span> <span class="pl-s">"968 + 2 - 20"</span>;
+  <span class="pl-k">var</span> res <span class="pl-k">=</span> expr.check(input);
+  <span class="pl-k">var</span> tree <span class="pl-k">=</span> res.matchTree();
+
+  print(tree);
+  print(<span class="pl-s">"<span class="pl-k">${</span><span class="pl-s1">input</span><span class="pl-k">}</span> = <span class="pl-k">${</span><span class="pl-s1">visitChild(tree, [])[<span class="pl-c1">0</span>]</span><span class="pl-k">}</span>"</span>);
+}</pre></div>
+
+<h2>
+<a id="future" class="anchor" href="#future" aria-hidden="true"><span class="octicon octicon-link"></span></a>Future</h2>
+
+<p>Actually my main focus is to make parserflow as easy as possible, but the second step will be to make it a quick as posible.</p>
+
+<h2>
+<a id="the-author" class="anchor" href="#the-author" aria-hidden="true"><span class="octicon octicon-link"></span></a>The Author</h2>
+
+<p>Actualy this library is developped by myself, if you have any idea, amelioration, bug, ... do not hesitate contacting me.
+G+ : <a href="https://plus.google.com/+K%C3%A9vinPlatel">+Kevin PLATEL</a>
+Mail : <a href="platel.kevin@gmail.com">Kevin PLATEL</a></p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
