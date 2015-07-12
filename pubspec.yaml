@@ -3,7 +3,7 @@ description: >
   An experimental parsing library
 version: 0.0.1
 author: PLATEL Kevin <platel.kevin@gmail.com>
-#homepage: https://www.example.com
+homepage: http://platelk.github.io/parserflow
 dependencies:
   logging: any
 dev_dependencies:
