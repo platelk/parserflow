@@ -72,5 +72,4 @@ main() {
   var input = "2*3-4*2";
   var res = expr.check(input);
   print("res : ${res.data["res"]}");
-  //print("${input} = ${visitChild(tree, [])[0]}");
 }

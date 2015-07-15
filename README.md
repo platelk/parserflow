@@ -49,17 +49,21 @@ void main() {
 Here a part of the example that you can find in 'example/math_expr.dart'
 ```dart
 main() {
-  var number = (has("-")["*"] & isNum)..name = "number";
-  var op = hasRegExp(r'[+|-]')..name = "op";
+  var number = (isNum)..name = "number"; // Define rule name 'number'
+  number.onParse.add((i) {  // apply a function to be call every time a 'number' is match
+    i["value"] = int.parse(i.matchData.join()); // matchData is of type List, so i join to recreate the string
+  });
 
-  var expr = number & (op & number)["*"];
+  var factor_op = (hasRegExp(r"[ \* | \/ | % ]")..name = "high_op")((i) => i["op"] = i.matchData.join()); // you can also use the "()" operator to directly pass a function (or 'hook')
+  var op = (hasRegExp(r"[-|+]")..name = "op")((i) => i["op"] = i.matchData.join());
 
-  var input = "968 + 2 - 20";
+  var factor = (((number & factor_op & number)..name = "factor") | number)..name = "factor";
+  factor.onParse.add(factorHook);
+
+  var expr = (factor & ((op & factor)..name = "low_exp")["*"])(resolveExpr);
+  var input = "2*3-4*2";
   var res = expr.check(input);
-  var tree = res.matchTree();
-  
-  print(tree);
-  print("${input} = ${visitChild(tree, [])[0]}");
+  print("res : ${res.data["res"]}");
 }
 ```
 
