@@ -2,8 +2,11 @@ part of parserflow;
 
 int isDigitMatcher(var data) {
   var v;
-  if (data is List)
-    v = data[0];
+  if (data is List) {
+   if (data.length == 0)
+     return MatchInfo.MATCH_FAILED;
+   v = data[0];
+  }
   else if (data is ParseUnit)
     v = data.value;
   else

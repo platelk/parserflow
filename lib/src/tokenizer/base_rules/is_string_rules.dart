@@ -29,7 +29,6 @@ hasMatcherGenerator(var s) {
     else if (s is RegExp) {
       var m = (s as RegExp).firstMatch(tmp);
       if (m != null && m.start == 0) {
-        var m = (s as RegExp).firstMatch(tmp);
         return m.end - m.start;
       } else {
         return MatchInfo.MATCH_FAILED;

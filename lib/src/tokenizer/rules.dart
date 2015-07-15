@@ -1,6 +1,7 @@
 part of parserflow;
 
 typedef int RulesMatcher(List data);
+typedef void onParseFunc(MatchInfo m);
 
 class Rules implements Clonable<Rules> {
   static final log = new Logger("Rules");
@@ -9,12 +10,12 @@ class Rules implements Clonable<Rules> {
   RulesMatcher _matcher;
   Quantifier quantifier;
   int quantity;
-  StreamController<MatchInfo> _onParseEvent;
+  List<onParseFunc> _onParseEvent;
 
   Rules(this.name, {RulesMatcher matcher, this.quantifier, this.quantity: 1}) : _matcher = matcher {
     if (quantifier == null)
       quantifier = Quantifier.One;
-    this._onParseEvent = new StreamController.broadcast();
+    this._onParseEvent = [];
   }
 
   Rules addChild(Rules r) {
@@ -76,12 +77,12 @@ class Rules implements Clonable<Rules> {
 
   call(var func) {
     //var tmp = this.clone();
-    this.onParse.listen(func);
+    this.onParse.add(func);
     return this;
   }
 
-  Stream get onParse {
-    return this._onParseEvent.stream;
+  List get onParse {
+    return this._onParseEvent;
   }
 
   /**
@@ -111,7 +112,7 @@ class Rules implements Clonable<Rules> {
 
 ///   [_check] if the input data match the rule
 ///   Return a MatchInfo object
-  MatchInfo _check(List data, var counter, var checkChild) {
+  MatchInfo _check(List data, var counter, var checkChild, bool addFailInfo) {
     if (_matcher != null) {
       log.finest("${name}: check on ${data}");
       counter = matchQuantifyRules(data, _matcher, quantifier, quantity: this.quantity)
@@ -119,7 +120,6 @@ class Rules implements Clonable<Rules> {
       if (counter.match == false) {
         return counter;
       }
-      _onParseEvent.add(counter);
     }
 
     if (checkChild) {
@@ -134,7 +134,7 @@ class Rules implements Clonable<Rules> {
   }
 
   ///
-  MatchInfo check(var data, {bool checkChild: true, bool ignoreSpace : true}) {
+  MatchInfo check(var data, {bool checkChild: true, bool ignoreSpace : true, bool addFailInfo : false}) {
     if (data is String) {
       data = new List.from(data.split(''));
     }
@@ -144,23 +144,28 @@ class Rules implements Clonable<Rules> {
     MatchInfo counter = new MatchInfo();
     MatchInfo tmp;
 
-    counter.matchRule = null;
+    counter.matchRule = new Container()
+      ..quantity = this.quantity
+      ..quantifier = this.quantifier;
 
     var i = 0;
     do {
-      tmp = _check((data as List).sublist(counter.counter), new MatchInfo(), checkChild);
+      tmp = _check((data as List).sublist(counter.counter), new MatchInfo(), checkChild, addFailInfo);
       tmp.matchRule = this;
-      if (tmp.match) {
-        if (tmp.counter > 0) i++;
-        this._onParseEvent.add(tmp);
+      if (tmp.match || addFailInfo) {
+        this._onParseEvent.forEach((f) => f(tmp));
+        if (tmp.counter > 0 && !addFailInfo) i++;
         counter << tmp;
         counter.matchData = (counter.matchData == null) ? tmp.matchData: counter.matchData.addAll(tmp.matchData);
         tmp.matchRule = this;
         counter.child.add(tmp);
+        if (!tmp.match) break;
       } else {
         break;
       }
     } while(tmp.match && tmp.counter > 0 && continueCheck(i, this.quantifier, this.quantity) && counter.counter < data.length);
+    if (counter.child.length == 1)
+      counter = counter.child[0];
     if (!matchQuantifier(i, this.quantifier, this.quantity))
       counter.counter = MatchInfo.MATCH_FAILED;
     return counter;
@@ -200,7 +205,7 @@ class Rules implements Clonable<Rules> {
     t.quantifier = this.quantifier;
     t._matcher = this._matcher;
     t._child = new List.from(this._child);
-    t.onParse.listen((e) => this._onParseEvent.add(e));
+    t.onParse.addAll(this._onParseEvent);
     return t;
   }
 }

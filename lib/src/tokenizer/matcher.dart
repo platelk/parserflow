@@ -25,12 +25,11 @@ class MatchInfo {
     return this;
   }
 
-  MatchInfo operator[]=(var key, var value) {
+  operator[]=(var key, var value) {
     this.data[key] = value;
-    return this;
   }
 
-  MatchInfo operator[](var key) {
+  operator[](var key) {
     return this.data[key];
   }
 
@@ -48,6 +47,33 @@ class MatchInfo {
     else
       _matchData += data;
     return _matchData;
+  }
+
+  MatchInfo get(var name, {bool rec : false}) {
+    for (var m in this.child) {
+      if (m.matchRule != null && m.matchRule.name == name)
+        return m;
+      if (rec) {
+        var tmp = m.get(name, rec: rec);
+        if (tmp != null)
+          return tmp;
+      }
+    }
+    return null;
+  }
+
+  List<MatchInfo> getAll(var name, {bool rec : false}) {
+    var l = [];
+    for (var m in this.child) {
+      if (m.matchRule != null && m.matchRule.name == name)
+        l.add(m);
+      if (rec) {
+        var tmp = m.getAll(name, rec: rec);
+        if (tmp.length != 0)
+          l.addAll(tmp);
+      }
+    }
+    return l;
   }
 
   bool get match => counter != MATCH_FAILED;
@@ -80,7 +106,7 @@ class MatchInfo {
 
 
   matchTree() {
-    if (this.child.length == 0 && this.matchRule != null)
+    if (this.child.length == 0 && this.matchRule != null && this.matchRule.name != "Container")
       return this;
     var l = [];
     for (var m in child) {
@@ -88,11 +114,11 @@ class MatchInfo {
       if (t != null)
         l.add(t);
     }
-    if (this.matchRule == null && l.length == 0)
+    if ((this.matchRule == null || this.matchRule.name == "Container") && l.length == 0)
       return null;
     else if (this.matchRule == null && l.length == 1)
       return l[0];
-    else if (this.matchRule == null && l.length > 0)
+    else if ((this.matchRule == null || this.matchRule.name == "Container") && l.length > 0)
       return l;
     else if (l.length == 0)
       return this;

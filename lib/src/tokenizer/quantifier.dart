@@ -8,6 +8,10 @@ enum Quantifier {
   NTimes
 }
 
+class Container extends Rules {
+  Container(): super("Container", quantifier:Quantifier.One);
+}
+
 bool continueCheck(int nbMatch, Quantifier quantifier, int quantity) {
   switch (quantifier) {
     case Quantifier.One:
