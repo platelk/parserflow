@@ -21,7 +21,7 @@ var myRule = (isDigit["*"] | isMathOperator["*"]) & isDigit[3]
 - **[DONE]** Simply define hook
 ```dart
   var number = (has("-")["*"] & isNum)..name = "number";
-  number.onParse.listen((i) {
+  number.onParse.add((i) {
     print("number: ${i.matchData}");
     i["value"] = int.parse(i.matchData.join());
   });
