@@ -48,7 +48,7 @@ void main() {
 ### Parse a simple math expression
 Here a part of the example that you can find in 'example/math_expr.dart'
 ```dart
-main() {
+void main() {
   var number = (isNum)..name = "number"; // Define rule name 'number'
   number.onParse.add((i) {  // apply a function to be call every time a 'number' is match
     i["value"] = int.parse(i.matchData.join()); // matchData is of type List, so i join to recreate the string

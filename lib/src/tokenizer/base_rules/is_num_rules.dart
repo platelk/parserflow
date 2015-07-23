@@ -21,7 +21,7 @@ int isDigitMatcher(var data) {
 int isNumMatcher(var data) {
   int tmp = 0;
   for (var v in data) {
-    if (isDigitMatcher(v) == false)
+    if (isDigitMatcher(v) == MatchInfo.MATCH_FAILED)
       return tmp == 0 ? MatchInfo.MATCH_FAILED : tmp;
     tmp++;
   }
@@ -29,11 +29,15 @@ int isNumMatcher(var data) {
 }
 
 class IsDigit extends Rules {
-  IsDigit() : super("IsDigit", matcher: isDigitMatcher, quantifier:Quantifier.One);
+  IsDigit() : super("IsDigit", matcher: isDigitMatcher, quantifier:Quantifier.One) {
+    this.isTerminal = true;
+  }
 }
 
 class IsNum extends Rules {
-  IsNum() : super("IsNum", matcher: isDigitMatcher, quantifier: Quantifier.OneOrMore);
+  IsNum() : super("IsNum", matcher: isNumMatcher, quantifier: Quantifier.One) {
+    this.isTerminal = true;
+  }
 }
 
 IsNum isNum = new IsNum();

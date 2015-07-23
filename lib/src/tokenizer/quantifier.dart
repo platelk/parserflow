@@ -51,14 +51,18 @@ bool matchQuantifier(int nbMatch, Quantifier quantifier, int quantity) {
   return false;
 }
 
-MatchInfo matchQuantifyRules(List data, RulesMatcher r, Quantifier quantifier, {int quantity: 1}) {
+MatchInfo matchQuantifyRules(List data, RulesMatcher r, Quantifier quantifier, {int quantity: 1, Rules from: null}) {
   int nbMatch = 0;
   int tmp = 0;
   int count = 0;
   MatchInfo match = new MatchInfo();
 
   do {
-    tmp = r(data.sublist(count));
+    if (data.length > 0 && data[count] is Rules) {
+      tmp = data[count] == from ? 1 : MatchInfo.MATCH_FAILED;
+    } else {
+      tmp = r(data.sublist(count));
+    }
     if (tmp != MatchInfo.MATCH_FAILED) nbMatch++;
     count += (tmp == MatchInfo.MATCH_FAILED ? 0 : tmp);
   } while(count < data.length && tmp != MatchInfo.MATCH_FAILED && continueCheck(nbMatch, quantifier, quantity));

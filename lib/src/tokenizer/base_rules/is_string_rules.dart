@@ -8,7 +8,10 @@ class IsStr extends Rules {
       return s == (data.join());
     else if (data is List<int>)
       return s == (new String.fromCharCodes(data));
-  }, quantifier:Quantifier.One);
+  }, quantifier:Quantifier.One) {
+    this.data = s;
+    this.isTerminal = true;
+  }
 }
 
 
@@ -38,7 +41,18 @@ hasMatcherGenerator(var s) {
 }
 
 class Has extends Rules {
-  Has(var s): super("Has", matcher: hasMatcherGenerator(s), quantifier:Quantifier.One);
+  Has(var s): super("Has", matcher: hasMatcherGenerator(s), quantifier:Quantifier.One) {
+    this.data = s;
+    this.isTerminal = true;
+  }
+
+  bool operator==(var r) {
+    if (this.equal(r)) {
+      return data == r.data;
+    } else {
+      return false;
+    }
+  }
 }
 
 Rules isStr(String s) {

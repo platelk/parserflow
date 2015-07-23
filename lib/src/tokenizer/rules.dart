@@ -11,6 +11,8 @@ class Rules implements Clonable<Rules> {
   Quantifier quantifier;
   int quantity;
   List<onParseFunc> _onParseEvent;
+  var data;
+  bool isTerminal = false;
 
   Rules(this.name, {RulesMatcher matcher, this.quantifier, this.quantity: 1}) : _matcher = matcher {
     if (quantifier == null)
@@ -24,7 +26,11 @@ class Rules implements Clonable<Rules> {
   }
 
   Rules operator&(Rules r) {
-      return new And([this, r]);
+    if (this is And && this.quantifier == Quantifier.One && this.quantity == 1 && !(r is And)) {
+      this.addChild(r);
+      return this;
+    }
+    return new And([this, r]);
   }
 
   Rules operator|(Rules r) {
@@ -75,6 +81,20 @@ class Rules implements Clonable<Rules> {
     return data;
   }
 
+  List get child => _child;
+
+  bool equal(var r) {
+    if (this.runtimeType == r.runtimeType && this.name == r.name) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  bool operator==(var r) {
+    return this.equal(r);
+  }
+
   call(var func) {
     //var tmp = this.clone();
     this.onParse.add(func);
@@ -88,7 +108,7 @@ class Rules implements Clonable<Rules> {
   /**
    * Check if the rule have at least one child
    */
-  bool haveChild() => _child.isEmpty;
+  bool haveChild() => _child.length > 0;
 
   /**
    * [_checkChild] will iterate on each child of the rules and check if each child match the input data
@@ -115,7 +135,7 @@ class Rules implements Clonable<Rules> {
   MatchInfo _check(List data, var counter, var checkChild, bool addFailInfo) {
     if (_matcher != null) {
       log.finest("${name}: check on ${data}");
-      counter = matchQuantifyRules(data, _matcher, quantifier, quantity: this.quantity)
+      counter = matchQuantifyRules(data, _matcher, quantifier, quantity: this.quantity, from: this)
         ..matchRule = this;
       if (counter.match == false) {
         return counter;
@@ -184,13 +204,33 @@ class Rules implements Clonable<Rules> {
     return ret;
   }
 
-  String toString() {
-    var s = "[Rules (${this.name})] quantifior: ${this.quantifier}, quantity: ${this.quantity}, nbChild: ${this._child.length}\n";
+  List findAll(var predicate) {
+    var l = [];
+    if (predicate(this) == true && !l.contains(this))
+      l.add(this);
+    for (var c in this._child) {
+      if (predicate(c) == true && !l.contains(c))
+        l.add(c);
+      for (var tmp in c.findAll(predicate)) {
+        if (!l.contains(tmp))
+          l.add(tmp);
+      }
+    }
+    return l;
+  }
+
+  List findAllByName(String name) {
+    return findAll((r) => r.name == name);
+  }
+
+  String toString({depth: 0}) {
+    var s = "[${runtimeType} (${name})] quantifior: ${quantifier}, quantity: ${quantity}, nbChild: ${_child.length}, isTerminal : ${isTerminal}\n";
     for (var r in this._child) {
+      s +=(new List.filled(depth, " ")).join();
       if (r != this)
-        s += " - " + r.toString();
+        s += " - " + r.toString(depth: depth+2);
       else
-        s += " - [Rules (${this.name})] quantifior: ${this.quantifier}, quantity: ${this.quantity}, nbChild: ${this._child.length}\n";
+        s += " - [${runtimeType} (${name})] quantifior: ${quantifier}, quantity: ${quantity}, nbChild: ${_child.length}\n";
     }
     return s;
   }
@@ -205,6 +245,8 @@ class Rules implements Clonable<Rules> {
     t.quantifier = this.quantifier;
     t._matcher = this._matcher;
     t._child = new List.from(this._child);
+    t.isTerminal = this.isTerminal;
+    t.data = this.data;
     t.onParse.addAll(this._onParseEvent);
     return t;
   }

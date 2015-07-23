@@ -2,34 +2,6 @@ library parserflow.example;
 
 import 'package:parserflow/parserflow.dart';
 
-visitChild(List<MatchInfo> l, var buffer) {
-  for (var m in l) {
-    if (m is List)
-      visitChild(m, buffer);
-    else {
-      visitNode(m, buffer);
-    }
-  }
-  return buffer;
-}
-
-int visitNode(MatchInfo m, buffer) {
-  if (m.matchRule.name == "number") {
-    //var signe = m.child[m.child.length - 2].matchData;
-    var num = m.matchData.join();
-    if (buffer.length > 1) {
-      buffer.add(buffer.removeLast()(buffer.removeLast(), int.parse(num)));
-    }
-    else
-      buffer.add(int.parse(num));
-  } else if (m.matchRule.name == "op") {
-    if (m.matchData[0] == "+") buffer.add((a, b) => a + b);
-    if (m.matchData[0] == "-") buffer.add((a, b) => a - b);
-    if (m.matchData[0] == "*") buffer.add((a, b) => a * b);
-    if (m.matchData[0] == "/") buffer.add((a, b) => a / b);
-  }
-}
-
 var opTable = {
   "+": (a, b) => a+b,
   "-": (a, b) => a-b,
@@ -40,9 +12,9 @@ var opTable = {
 void factorHook(MatchInfo i) {
   if (i.get("number") != null) {
     i["value"] = i.get("number")["value"];
-  } else if (i.get("factor") != null) {
-    var tmp = i.get("factor");
-    i["value"] = opTable[tmp.get("high_op", rec: true)["op"]](tmp.get("number", rec: true)["value"], tmp.get("number")["value"]);
+  } else if (i.get("factor_calc") != null) {
+    var tmp = i.get("factor_calc");
+    i["value"] = opTable[tmp.get("high_op", rec: true)["op"]](tmp.child[0]["value"], tmp.child[2]["value"]);
   }
 }
 
@@ -65,11 +37,15 @@ main() {
   var factor_op = (hasRegExp(r"[ \* | \/ | % ]")..name = "high_op")((i) => i["op"] = i.matchData.join()); // you can also use the "()" operator to directly pass a function (or 'hook')
   var op = (hasRegExp(r"[-|+]")..name = "op")((i) => i["op"] = i.matchData.join());
 
-  var factor = (((number & factor_op & number)..name = "factor") | number)..name = "factor";
+  var factor = (((number & factor_op & number)..name = "factor_calc") | number)..name = "factor";
   factor.onParse.add(factorHook);
 
   var expr = (factor & ((op & factor)..name = "low_exp")["*"])(resolveExpr);
-  var input = "2*3-4*2";
+  var l = new LrTableGenerator().generateTable(expr);
+
+  var input = "2*3+2";
+  print(expr);
   var res = expr.check(input);
+  print(res.matchTree());
   print("res : ${res.data["res"]}");
 }
