@@ -1,5 +1,8 @@
 part of parserflow;
 
+/**
+ * ParseUnit is a class that store all the information about one parsing unit (usually a character) as hits position in a file and in a line
+ */
 class ParseUnit<T> {
   int line;
   int pos;

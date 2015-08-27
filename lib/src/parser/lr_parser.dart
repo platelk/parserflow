@@ -1,5 +1,8 @@
 part of parserflow;
 
+/**
+ * Implementation of the LR parsing algorithm
+ */
 class LrParser extends Parser {
   LrTableGenerator tableGenerator;
   List<Map<String, List<String>>> table;

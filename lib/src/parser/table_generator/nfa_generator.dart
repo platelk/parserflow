@@ -1,5 +1,8 @@
 part of parserflow;
 
+/**
+ * NFA will generate the Non Finite Automate from a CNF grammar that will be used be the LR Parser
+ */
 class NFA {
   List<String> rules;
   List<List<String>> rule = [];

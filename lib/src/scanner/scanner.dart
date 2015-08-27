@@ -1,5 +1,8 @@
 part of parserflow;
 
+/**
+ * Scanner will scan a input unit by unit and produce ParseUnit
+ */
 class Scanner<T> {
   static final log = new Logger("Scanner");
   int _currentPos = 0;

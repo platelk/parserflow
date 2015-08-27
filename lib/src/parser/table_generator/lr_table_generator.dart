@@ -1,5 +1,10 @@
 part of parserflow;
 
+/**
+ * This class will allow the generation of the LR Parsing table needed be the LR Parsing algorithm
+ *
+ * It will require the NFA Generated from the CNF Grammar
+ */
 class LrTableGenerator extends TableGenerator {
   List<String> rules;
   List<List<String>> rule = [];
