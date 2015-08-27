@@ -1,5 +1,11 @@
 part of parserflow;
 
+/**
+ * MatchInfo will contains all the information about what have been match by a matcher as:
+ * - Number of character match
+ * - Which rules have been match
+ * - ...
+ */
 class MatchInfo {
   static final int MATCH_FAILED = -1;
   int counter = 0;
@@ -12,6 +18,9 @@ class MatchInfo {
     if (this.child == null) this.child = [];
   }
 
+  /**
+   * Increase the number of character match
+   */
   int add(var v) {
     if (v is int)
       counter += v;
@@ -33,6 +42,9 @@ class MatchInfo {
     return this.data[key];
   }
 
+  /**
+   * return the matched string
+   */
   get matchData {
     return _matchData;
   }
@@ -49,6 +61,10 @@ class MatchInfo {
     return _matchData;
   }
 
+  /**
+   * Find the MatchInformation the belong to a specific Rules inside a tree of MatchInfo.
+   * This method can be use to retrieve information store inside a child node
+   */
   MatchInfo get(var name, {bool rec : false}) {
     for (var m in this.child) {
       if (m.matchRule != null && m.matchRule.name == name)
@@ -62,6 +78,10 @@ class MatchInfo {
     return null;
   }
 
+  /**
+   * Find all MatchInformation the belong to a specific Rules inside a tree of MatchInfo.
+   * This method can be use to retrieve information store inside a child node
+   */
   List<MatchInfo> getAll(var name, {bool rec : false}) {
     var l = [];
     for (var m in this.child) {

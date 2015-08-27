@@ -12,8 +12,6 @@ import "package:logging/logging.dart";
 
 import "src/tools/tools.dart";
 
-// TODO: Export any libraries intended for clients of this package.
-
 part "src/scanner/parse_unit.dart";
 part "src/scanner/scanner.dart";
 part "src/scanner/scanner_conf.dart";
@@ -29,3 +27,7 @@ part "src/tokenizer/base_rules/is_string_rules.dart";
 
 part "src/parser/table_generator/table_generator.dart";
 part "src/parser/table_generator/lr_table_generator.dart";
+part "src/parser/table_generator/nfa_generator.dart";
+part "src/parser/table_generator/grammars.dart";
+part "src/parser/lr_parser.dart";
+part "src/parser/parser.dart";

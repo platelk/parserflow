@@ -9,7 +9,7 @@ class Scanner<T> {
   StreamSubscription<ParseUnit<T>> _subscription;
   StreamController<ParseUnit<T>> _controller;
 
-  Stream<T> source;
+  var source;
   ScannerConf conf;
 
   Scanner(Stream<T> source, {this.conf}) {
@@ -34,22 +34,69 @@ class Scanner<T> {
         onCancel: _onCancel);
   }
 
-  Future<ParseUnit<T>> scanOne() {
-    log.finest("Calling scan()");
+  Scanner.fromStringSync(String input, {this.conf}) {
+    var s = input.split('');
+    var source = s;
+    if (this.conf == null) conf = new ScannerConf();
+    this.source = source;
+  }
 
+  Future<ParseUnit<T>> scanOne() async {
     return this.source.first.then((T e) {
       _currentPos++;
+      _currentPosInline++;
       if (e == this.conf.endLine) {
         _currentLine++;
         _currentPosInline = 0;
       }
       log.finer("Receive: [${e}]");
+      if (this.conf.skip.contains(e))
+        return this.scanOne();
       return new ParseUnit(e, line: _currentLine, pos: _currentPos, inlinePos: _currentPosInline);
     });
   }
 
+
+  ParseUnit<T> scanOneSync() {
+    if (this.source is! List) throw new Exception("Scanner error : can't use scanOneSync when source is a Stream");
+    var e = this.source[_currentPos];
+    _currentPos++;
+    _currentPosInline++;
+    if (e == this.conf.endLine) {
+      _currentLine++;
+      _currentPosInline = 0;
+    }
+    log.finer("Receive: [${e}]");
+    if (this.conf.skip.contains(e))
+      return this.scanOneSync();
+    return new ParseUnit(e, line: _currentLine, pos: _currentPos, inlinePos: _currentPosInline);
+  }
+
+
+  List<ParseUnit<T>> scanSync() {
+    var l = [];
+    if (this.source is! List) throw new Exception("Scanner error : can't use scanSync when source is a Stream");
+    while (_currentPos < this.source.length) {
+      l.add(this.scanOneSync());
+    }
+    return l;
+  }
+
   Stream<ParseUnit<T>> scan() async* {
     yield (await scanOne());
+  }
+
+  Future<bool> get finnish async {
+    if (this.source is List)
+      return this.source.length >= _currentPos;
+    else if (this.source is Stream)
+      return (this.source as Stream).isEmpty;
+  }
+
+  bool get finnishSync {
+    if (this.source is List)
+      return !(this.source.length > _currentPos);
+    throw new Exception("Scanner error: can't use finnishSync when source is a Stream");
   }
 
   @override

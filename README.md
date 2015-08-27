@@ -3,6 +3,14 @@
 Parserflow is a prototype of parser written in Dart inspire by [pyrser](http://pythonhosted.org/pyrser) and [PetitParser](https://github.com/petitparser/dart-petitparser).
 This parser aims to provide a simple tool to implement different type of parser like LL(k) or LR(k), by offering simple mechanism like hook or grammar definition.
 
+## Installation
+
+To install and run example located in example/ folder you need :
+
+* install dart by following the instruction [here](https://www.dartlang.org/downloads/)
+* run  `pub get` in the root directory of the project to get all the dependencies
+* Then to run a example : `pub run example/math_expr.dart`
+
 ## Aims
 
 The main objective of parserflow is to provide enough abstraction and functionality to easily implement the parser do you need.
@@ -26,7 +34,20 @@ var myRule = (isDigit["*"] | isMathOperator["*"]) & isDigit[3]
     i["value"] = int.parse(i.matchData.join());
   });
 ```
-- **[TO DO]** Use directly some parser implementation like LL(k) or LR(k)
+- **[DONE]** Use directly some parser implementation like LL(k) or LR(k)
+```dart
+  var number = ((has('0') | has('1') | has('2'))["+"])..name = "num";
+  var operator = (has('+') | has('-'))..name = "operator";
+  var operation = (number & (((operator & number)..name="op")["*"]))..name = "operation";
+
+  var expr = operation;
+  var grammar = new CNFGrammarGenerator().generateGrammars(expr);
+  var nfa = new NFA();
+  var table = nfa.generatorNFA(grammar);
+  var lrTable = new LrTableGenerator(nfa);
+  var lr = new LrParser(tableGenerator: lrTable);
+  lr.parse("{x: {x}}");
+```
 - **[TO DO]** Directly parse from a BNF
    
 ## Example

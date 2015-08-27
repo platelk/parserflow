@@ -2,50 +2,42 @@ library parserflow.example;
 
 import 'package:parserflow/parserflow.dart';
 
-var opTable = {
-  "+": (a, b) => a+b,
-  "-": (a, b) => a-b,
-  "*": (a, b) => a*b,
-  "/": (a, b) => a/b
-};
-
-void factorHook(MatchInfo i) {
-  if (i.get("number") != null) {
-    i["value"] = i.get("number")["value"];
-  } else if (i.get("factor_calc") != null) {
-    var tmp = i.get("factor_calc");
-    i["value"] = opTable[tmp.get("high_op", rec: true)["op"]](tmp.child[0]["value"], tmp.child[2]["value"]);
-  }
-}
-
-void resolveExpr(MatchInfo i) {
-  var a = i.get("factor")["value"];
-  for (var e in i.getAll("low_exp", rec: true)) {
-    var b = e.get("factor")["value"];
-    var o = e.get("op")["op"];
-    a = opTable[o](a, b);
-  }
-  i["res"] = a;
-}
-
 main() {
-  var number = (isNum)..name = "number"; // Define rule name 'number'
-  number.onParse.add((i) {  // apply a function to be call every time a 'number' is match
-    i["value"] = int.parse(i.matchData.join()); // matchData is of type List, so i join to recreate the string
-  });
+  var number = ((has('0') | has('1') | has('2'))["+"])..name = "num";
+  var operator = (has('+') | has('-'))..name = "operator";
+  var operation = (number & (((operator & number)..name="op")["*"]))..name = "operation";
 
-  var factor_op = (hasRegExp(r"[ \* | \/ | % ]")..name = "high_op")((i) => i["op"] = i.matchData.join()); // you can also use the "()" operator to directly pass a function (or 'hook')
-  var op = (hasRegExp(r"[-|+]")..name = "op")((i) => i["op"] = i.matchData.join());
+  var expr = operation;
+  var grammar = new CNFGrammarGenerator().generateGrammars(expr);
+  print("grammar: \n${grammar}");
 
-  var factor = (((number & factor_op & number)..name = "factor_calc") | number)..name = "factor";
-  factor.onParse.add(factorHook);
-
-  var expr = (factor & ((op & factor)..name = "low_exp")["*"])(resolveExpr);
-  var l = new LrTableGenerator().generateTable(expr);
-
-  var input = "2*3+2";
-  print(expr);
+  var toolGrammar = '''
+    Goal -> S
+    S -> { S G
+    S -> { S G
+    G -> }
+    G -> : L }
+    S -> x
+    S -> y
+    L -> S
+    L -> L , S
+  ''';
+  var nfa = new NFA();
+  var table = nfa.generatorNFA(grammar);
+  var lrTable = new LrTableGenerator(nfa);
+  lrTable.printTable(lrTable.generateTable(), startPad: 65, linePad: 50, basePad: 15);
+//  nfa = new NFA();
+//  table = nfa.generatorNFA('''
+//      Goal -> A
+//      A -> ( A )
+//      A -> Two
+//      Two -> a
+//      Two -> b
+//  ''');
+  var lr = new LrParser(tableGenerator: lrTable);
+  lr.parse("111+222-000");
+  var input = "12+2-1";
   var res = expr.check(input);
   print(res.matchTree());
-  print("res : ${res.data["res"]}");
+//  print("res : ${res.data["res"]}");
 }

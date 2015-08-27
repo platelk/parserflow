@@ -17,6 +17,7 @@ class IsStr extends Rules {
 
 hasMatcherGenerator(var s) {
   return (var data) {
+    print("Input: ${data}");
     var tmp;
     if (data is String)
       tmp = data;
@@ -25,8 +26,11 @@ hasMatcherGenerator(var s) {
     else if (data is List<int>)
       tmp = (new String.fromCharCodes(data));
     if (s is String) {
-     if (s == tmp)
-       return tmp.length;
+      int i = 0;
+      while (i < s.length && i < data.length && s[i] == data[i])
+        i++;
+     if (i > 0)
+       return i;
       return MatchInfo.MATCH_FAILED;
     }
     else if (s is RegExp) {
@@ -44,6 +48,9 @@ class Has extends Rules {
   Has(var s): super("Has", matcher: hasMatcherGenerator(s), quantifier:Quantifier.One) {
     this.data = s;
     this.isTerminal = true;
+    if (data is String) {
+      this.name = "match_${data}";
+    }
   }
 
   bool operator==(var r) {
@@ -51,6 +58,14 @@ class Has extends Rules {
       return data == r.data;
     } else {
       return false;
+    }
+  }
+
+  String ebnfString() {
+    if (data is RegExp) {
+      return (data as RegExp).pattern;
+    } else if (data is String) {
+      return "${data}";
     }
   }
 }

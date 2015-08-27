@@ -38,6 +38,20 @@ class IsNum extends Rules {
   IsNum() : super("IsNum", matcher: isNumMatcher, quantifier: Quantifier.One) {
     this.isTerminal = true;
   }
+
+  String ebnfString() {
+    return 'digit\n${name} -> digit ${name}\n' +
+    'digit -> 0\n' +
+    'digit -> 1\n' +
+    'digit -> 2\n' +
+    'digit -> 3\n' +
+    'digit -> 4\n' +
+    'digit -> 5\n' +
+    'digit -> 6\n' +
+    'digit -> 7\n' +
+    'digit -> 8\n' +
+    'digit -> 9';
+  }
 }
 
 IsNum isNum = new IsNum();

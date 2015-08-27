@@ -1,5 +1,8 @@
 part of parserflow;
 
+/**
+ * Quantifier are use to specify the number of element that can be match at maximum or minimum
+ */
 enum Quantifier {
   OneOrMore,
   OneOrNot,

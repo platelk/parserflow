@@ -3,6 +3,12 @@ part of parserflow;
 typedef int RulesMatcher(List data);
 typedef void onParseFunc(MatchInfo m);
 
+/**
+ * Rules represent one rule of a grammar in the BNF form.
+ * A Rules can contains child, have a specific quantifier and a specific matcher
+ *
+ * Rules implement a basic Top-Down parsing algorithm through `.consume` and `.check`
+ */
 class Rules implements Clonable<Rules> {
   static final log = new Logger("Rules");
   String name;
@@ -153,7 +159,7 @@ class Rules implements Clonable<Rules> {
     return counter;
   }
 
-  ///
+  /// Parse the input data by using a basic top-down algorithm
   MatchInfo check(var data, {bool checkChild: true, bool ignoreSpace : true, bool addFailInfo : false}) {
     if (data is String) {
       data = new List.from(data.split(''));
@@ -186,11 +192,13 @@ class Rules implements Clonable<Rules> {
     } while(tmp.match && tmp.counter > 0 && continueCheck(i, this.quantifier, this.quantity) && counter.counter < data.length);
     if (counter.child.length == 1)
       counter = counter.child[0];
-    if (!matchQuantifier(i, this.quantifier, this.quantity))
+    if (!matchQuantifier(i, this.quantifier, this.quantity)) {
       counter.counter = MatchInfo.MATCH_FAILED;
+    }
     return counter;
   }
 
+  /// Parse the input data by using a basic top-down algorithm
   /// Consume the input data if the rules matches
   List consume(var data, {bool checkChild: true}) {
     if (data is String) {
@@ -204,23 +212,51 @@ class Rules implements Clonable<Rules> {
     return ret;
   }
 
-  List findAll(var predicate) {
+  /// Search inside the Rules or his child, All the Rules that match the predicate
+  List findAll(var predicate, [List ignoreList]) {
     var l = [];
-    if (predicate(this) == true && !l.contains(this))
+    if (ignoreList != null && ignoreList.contains(this))
+      return l;
+    if (predicate(this) == true && !l.contains(this)) {
       l.add(this);
+      ignoreList.add(this);
+    }
     for (var c in this._child) {
-      if (predicate(c) == true && !l.contains(c))
-        l.add(c);
-      for (var tmp in c.findAll(predicate)) {
-        if (!l.contains(tmp))
-          l.add(tmp);
+      if (predicate(c) == true && !l.contains(c)) {
+        if (ignoreList == null || !ignoreList.contains(c))
+          l.add(c);
+      }
+      if (ignoreList != null)
+        ignoreList.add(c);
+      if (ignoreList == null || !ignoreList.contains(c)) {
+        for (var tmp in c.findAll(predicate, ignoreList)) {
+          if (!l.contains(tmp)) {
+            if (ignoreList != null)
+              ignoreList.add(tmp);
+            if (ignoreList == null || !ignoreList.contains(tmp))
+              l.add(tmp);
+          }
+        }
       }
     }
     return l;
   }
 
+  /// Search inside the Rules or his child, All the Rules that match the name
   List findAllByName(String name) {
-    return findAll((r) => r.name == name);
+    return findAll((r) => r.name == name, []);
+  }
+
+  /// Search inside the Rules or his child, a Rule that match the predicate
+  find(var predicate) {
+    var r = findAll(predicate, []);
+    return (r == null || r.length == 0 ? null : r[0]);
+  }
+
+  /// Search inside the Rules or his child, a Rule that match name
+  findByName(String name) {
+    var r = findAllByName(name);
+    return (r == null || r.length == 0 ? null : r[0]);
   }
 
   String toString({depth: 0}) {
@@ -235,10 +271,16 @@ class Rules implements Clonable<Rules> {
     return s;
   }
 
+
+  String ebnfString() {
+    return this.data;
+  }
+
   Rules _clone() {
     return new Rules(this.name);
   }
 
+  /// Create a clone of the Rules, that will share child, listener and data
   clone() {
     var t = _clone();
     t.name = this.name;

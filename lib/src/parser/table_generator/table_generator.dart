@@ -19,5 +19,5 @@ class ParsingTable {
 abstract class TableGenerator {
   TableGenerator();
 
-  ParsingTable generateTable(Rules r);
+  generateTable();
 }
